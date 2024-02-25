@@ -35,4 +35,3 @@ class Lista_Pisos:
             print("Patrón Nuevo:", current.patron_nuevo)
             print("-------------------------")
             current = current.siguiente
-
