@@ -143,39 +143,46 @@ def leer_archivo_xml(ruta_archivo):
 def construir_matrices(lista_pisos):
     current = lista_pisos.head
     while current:
-        print("Nombre:", current.nombre)
-        print("R:", current.R)
-        print("C:", current.C)
-        print("Matriz:")
         construir_matriz_piso(current)
-        print("-------------------------")
         current = current.siguiente
 
 def construir_matriz_piso(piso):
+    print("Nombre:", piso.nombre)
+    print("R:", piso.R)
+    print("C:", piso.C)
+    print("Matriz:")
+    print("Actual:")
+    construir_matriz_actual(piso)
+    print("Nuevo:")
+    construir_matriz_nuevo(piso)
+    print("-------------------------")
+
+def construir_matriz_actual(piso):
     actual_letra = piso.patrones_head_actual
-    nuevo_letra = piso.patrones_head_nuevo
 
     for _ in range(piso.R):
         actual_row = ""
-        nuevo_row = ""
-
         for _ in range(piso.C):
             if actual_letra:
                 actual_row += actual_letra.letra + " "
                 actual_letra = actual_letra.siguiente
             else:
                 actual_row += "- "
+        print(actual_row)
 
+def construir_matriz_nuevo(piso):
+    nuevo_letra = piso.patrones_head_nuevo
+
+    for _ in range(piso.R):
+        nuevo_row = ""
+        for _ in range(piso.C):
             if nuevo_letra:
                 nuevo_row += nuevo_letra.letra + " "
                 nuevo_letra = nuevo_letra.siguiente
             else:
                 nuevo_row += "- "
+        print(nuevo_row)
 
-        print("", actual_row)
-        print("", nuevo_row)
-
-# Ejemplo de uso:
 ruta_archivo_xml = 'prueba.xml'
 lista_pisos = leer_archivo_xml(ruta_archivo_xml)
 lista_pisos.ordenar_pisos_alfabeticamente()
