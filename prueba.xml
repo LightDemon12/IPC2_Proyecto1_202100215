@@ -15,8 +15,8 @@
         <F>1</F>
         <S>1</S>
         <patrones>
-            <patron codigo="cod11">BNBNBBBN</patron>
-            <patron codigo="cod12">NBNBBBBB</patron>
+            <patron codigo="cod41">BNBNBBBN</patron>
+            <patron codigo="cod42">NBNBBBBB</patron>
         </patrones>
     </piso>
     <piso nombre="Z_piso">
