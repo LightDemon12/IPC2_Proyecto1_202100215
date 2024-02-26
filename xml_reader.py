@@ -84,6 +84,38 @@ class Lista_Pisos:
                 print(f"cod asociado {current.codigo} {current.letra}")
                 current = current.siguiente
 
+    def ordenar_pisos_alfabeticamente(self):
+        if not self.head:
+            return
+
+        sorted_head = None
+        current = self.head
+        while current:
+            next_node = current.siguiente
+            sorted_head = self.insert_sorted(sorted_head, current)
+            current = next_node
+
+        self.head = sorted_head
+
+    def insert_sorted(self, sorted_head, new_node):
+        if not sorted_head or sorted_head.nombre >= new_node.nombre:
+            new_node.siguiente = sorted_head
+            if sorted_head:
+                sorted_head.anterior = new_node
+            return new_node
+
+        current = sorted_head
+        while current.siguiente and current.siguiente.nombre < new_node.nombre:
+            current = current.siguiente
+
+        new_node.siguiente = current.siguiente
+        if current.siguiente:
+            current.siguiente.anterior = new_node
+        current.siguiente = new_node
+        new_node.anterior = current
+
+        return sorted_head
+    
 def leer_archivo_xml(ruta_archivo):
     lista_pisos = Lista_Pisos()
 
@@ -108,7 +140,44 @@ def leer_archivo_xml(ruta_archivo):
 
     return lista_pisos
 
+def construir_matrices(lista_pisos):
+    current = lista_pisos.head
+    while current:
+        print("Nombre:", current.nombre)
+        print("R:", current.R)
+        print("C:", current.C)
+        print("Matriz:")
+        construir_matriz_piso(current)
+        print("-------------------------")
+        current = current.siguiente
+
+def construir_matriz_piso(piso):
+    actual_letra = piso.patrones_head_actual
+    nuevo_letra = piso.patrones_head_nuevo
+
+    for _ in range(piso.R):
+        actual_row = ""
+        nuevo_row = ""
+
+        for _ in range(piso.C):
+            if actual_letra:
+                actual_row += actual_letra.letra + " "
+                actual_letra = actual_letra.siguiente
+            else:
+                actual_row += "- "
+
+            if nuevo_letra:
+                nuevo_row += nuevo_letra.letra + " "
+                nuevo_letra = nuevo_letra.siguiente
+            else:
+                nuevo_row += "- "
+
+        print("", actual_row)
+        print("", nuevo_row)
+
 # Ejemplo de uso:
 ruta_archivo_xml = 'prueba.xml'
 lista_pisos = leer_archivo_xml(ruta_archivo_xml)
+lista_pisos.ordenar_pisos_alfabeticamente()
 lista_pisos.mostrar_pisos()
+construir_matrices(lista_pisos)
