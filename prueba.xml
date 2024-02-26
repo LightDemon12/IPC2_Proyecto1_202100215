@@ -1,6 +1,5 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <pisosGuatemala>
-    <piso nombre="nombrePiso1">
+    <piso nombre="G_piso">
         <R>2</R>
         <C>4</C>
         <F>1</F>
@@ -10,7 +9,17 @@
             <patron codigo="cod12">NBNBBBBB</patron>
         </patrones>
     </piso>
-    <piso nombre="nombrePiso2">
+    <piso nombre="A_piso">
+        <R>2</R>
+        <C>4</C>
+        <F>1</F>
+        <S>1</S>
+        <patrones>
+            <patron codigo="cod11">BNBNBBBN</patron>
+            <patron codigo="cod12">NBNBBBBB</patron>
+        </patrones>
+    </piso>
+    <piso nombre="Z_piso">
         <R>3</R>
         <C>3</C>
         <F>1</F>
@@ -20,7 +29,7 @@
             <patron codigo="cod22">BBBBNBBBN</patron>
         </patrones>
     </piso>
-    <piso nombre="nombrePiso3">
+    <piso nombre="M_piso">
         <R>1</R>
         <C>5</C>
         <F>6</F>

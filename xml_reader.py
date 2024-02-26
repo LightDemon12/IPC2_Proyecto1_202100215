@@ -10,10 +10,10 @@ def leer_archivo_xml(ruta_archivo):
 
     for piso_elem in root.findall('piso'):
         nombre = piso_elem.get('nombre')
-        R = piso_elem.find('R').text
-        C = piso_elem.find('C').text
-        F = piso_elem.find('F').text
-        S = piso_elem.find('S').text
+        R = int(piso_elem.find('R').text)  # Convertir a entero
+        C = int(piso_elem.find('C').text)  # Convertir a entero
+        F = int(piso_elem.find('F').text)  # Convertir a entero
+        S = int(piso_elem.find('S').text)  # Convertir a entero
 
         patrones = piso_elem.find('patrones')
         patron_actual = patrones[0].text  # Primer patron
