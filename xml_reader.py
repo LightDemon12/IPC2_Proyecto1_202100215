@@ -1,190 +1,153 @@
 import xml.etree.ElementTree as ET
+from os import system, startfile
+from graphviz import Digraph
 
 class Nodo_Patron:
-    def __init__(self, codigo, letra):
+    def __init__(self, codigo, patron):
         self.codigo = codigo
-        self.letra = letra
+        self.patron = patron
         self.siguiente = None
-        self.anterior = None
 
 class Nodo_Piso:
-    def __init__(self, nombre, R, C, F, S):
+    def __init__(self, nombre, R, C):
         self.nombre = nombre
         self.R = R
         self.C = C
-        self.F = F
-        self.S = S
-        self.patrones_head_actual = None  # Inicializar patrones_head_actual
-        self.patrones_head_nuevo = None    # Inicializar patrones_head_nuevo
+        self.patrones_head = None
         self.siguiente = None
-        self.anterior = None
+    
+    def mostrar_matrices_piso(self):
+        current_patron = self.patrones_head
+        while current_patron:
+            print("Patron:", current_patron.codigo)
+            current_patron_text = current_patron.patron
+            index = 0
+
+            for _ in range(self.R):
+                new_row = ""
+                for _ in range(self.C):
+                    if index < len(current_patron_text):
+                        new_row += current_patron_text[index] + " "
+                        index += 1
+                    else:
+                        new_row += "- "
+                print(new_row)
+            print("")
+            current_patron = current_patron.siguiente
+
+    
 
 class Lista_Pisos:
     def __init__(self):
         self.head = None
 
-    def agregar_piso(self, nombre, R, C, F, S):
-        nuevo_piso = Nodo_Piso(nombre, R, C, F, S)
-        if not self.head:
-            self.head = nuevo_piso
-        else:
-            current = self.head
-            while current.siguiente:
-                current = current.siguiente
-            current.siguiente = nuevo_piso
-            nuevo_piso.anterior = current
-        return nuevo_piso
+    def agregar_piso(self, nombre, R, C):
+        nuevo_piso = Nodo_Piso(nombre, R, C)
 
-    def agregar_letra(self, piso, codigo, letra):
-        nuevo_patron = Nodo_Patron(codigo, letra)
-        if codigo[-1] == '1':
-            if not piso.patrones_head_actual:
-                piso.patrones_head_actual = nuevo_patron
-            else:
-                current = piso.patrones_head_actual
-                while current.siguiente:
-                    current = current.siguiente
-                current.siguiente = nuevo_patron
-                nuevo_patron.anterior = current
-        elif codigo[-1] == '2':
-            if not piso.patrones_head_nuevo:
-                piso.patrones_head_nuevo = nuevo_patron
-            else:
-                current = piso.patrones_head_nuevo
-                while current.siguiente:
-                    current = current.siguiente
-                current.siguiente = nuevo_patron
-                nuevo_patron.anterior = current
+        # Caso: la lista de pisos está vacía o el nuevo piso va al inicio
+        if not self.head or self.head.nombre > nombre:
+            nuevo_piso.siguiente = self.head
+            self.head = nuevo_piso
+            return nuevo_piso
+
+        current = self.head
+
+        # Encontrar la posición donde insertar el nuevo piso
+        while current.siguiente and current.siguiente.nombre <= nombre:
+            current = current.siguiente
+
+        nuevo_piso.siguiente = current.siguiente
+        current.siguiente = nuevo_piso
+
+        return nuevo_piso
+    
+    def obtener_piso(self, nombre_piso):
+        current = self.head
+        while current:
+            if current.nombre == nombre_piso:
+                return current
+            current = current.siguiente
+        return None  # Devolver None si no se encuentra el piso
+    
+    def agregar_patron(self, piso, codigo, patron):
+        nuevo_patron = Nodo_Patron(codigo, patron)
+
+        # Caso: la lista de patrones está vacía o el nuevo patrón va al inicio
+        if not piso.patrones_head or piso.patrones_head.codigo > codigo:
+            nuevo_patron.siguiente = piso.patrones_head
+            piso.patrones_head = nuevo_patron
+            return
+
+        current = piso.patrones_head
+
+        # Encontrar la posición donde insertar el nuevo patrón
+        while current.siguiente and current.siguiente.codigo <= codigo:
+            current = current.siguiente
+
+        nuevo_patron.siguiente = current.siguiente
+        current.siguiente = nuevo_patron
 
     def mostrar_pisos(self):
         current = self.head
         while current:
             print("Nombre:", current.nombre)
-            print("R:", current.R)
-            print("C:", current.C)
-            print("F:", current.F)
-            print("S:", current.S)
-            print("Patrones:")
-            self.mostrar_patrones(current)
-            print("-------------------------")
             current = current.siguiente
 
-    def mostrar_patrones(self, piso):
-        if piso.patrones_head_actual:
-            print("Patron actual:")
-            current = piso.patrones_head_actual
-            while current:
-                print(f"cod asociado {current.codigo} {current.letra}")
-                current = current.siguiente
 
-        if piso.patrones_head_nuevo:
-            print("Patron nuevo:")
-            current = piso.patrones_head_nuevo
-            while current:
-                print(f"cod asociado {current.codigo} {current.letra}")
-                current = current.siguiente
 
-    def ordenar_pisos_alfabeticamente(self):
-        if not self.head:
+    def mostrar_matriz(self, piso):
+        if not piso.patrones_head:
             return
+        construir_matriz_nuevo(piso)
+        print()
 
-        sorted_head = None
-        current = self.head
-        while current:
-            next_node = current.siguiente
-            sorted_head = self.insert_sorted(sorted_head, current)
-            current = next_node
+def construir_matriz_nuevo(piso, codigo_patron=None):
+    current_patron = piso.patrones_head
+    while current_patron:
+        if codigo_patron and current_patron.codigo != codigo_patron:
+            current_patron = current_patron.siguiente
+            continue
 
-        self.head = sorted_head
+        print("Patron:", current_patron.codigo)
+        current_patron_text = current_patron.patron  # Corregir acceso al atributo
+        index = 0
 
-    def insert_sorted(self, sorted_head, new_node):
-        if not sorted_head or sorted_head.nombre >= new_node.nombre:
-            new_node.siguiente = sorted_head
-            if sorted_head:
-                sorted_head.anterior = new_node
-            return new_node
+        for _ in range(piso.R):
+            new_row = ""
+            for _ in range(piso.C):
+                if index < len(current_patron_text):
+                    new_row += current_patron_text[index] + " "
+                    index += 1
+                else:
+                    new_row += "- "
+            print(new_row)
+        print("")
 
-        current = sorted_head
-        while current.siguiente and current.siguiente.nombre < new_node.nombre:
-            current = current.siguiente
+        if codigo_patron:
+            break
 
-        new_node.siguiente = current.siguiente
-        if current.siguiente:
-            current.siguiente.anterior = new_node
-        current.siguiente = new_node
-        new_node.anterior = current
+        current_patron = current_patron.siguiente
 
-        return sorted_head
-    
+
+
 def leer_archivo_xml(ruta_archivo):
     lista_pisos = Lista_Pisos()
-
     tree = ET.parse(ruta_archivo)
     root = tree.getroot()
-
     for piso_elem in root.findall('piso'):
         nombre = piso_elem.get('nombre')
         R = int(piso_elem.find('R').text)
         C = int(piso_elem.find('C').text)
-        F = int(piso_elem.find('F').text)
-        S = int(piso_elem.find('S').text)
 
-        nuevo_piso = lista_pisos.agregar_piso(nombre, R, C, F, S)
+        nuevo_piso = lista_pisos.agregar_piso(nombre, R, C)
 
         patrones_elem = piso_elem.find('patrones')
         for patron_elem in patrones_elem.findall('patron'):
             codigo = patron_elem.get('codigo')
             patron = patron_elem.text
-            for letra in patron:
-                lista_pisos.agregar_letra(nuevo_piso, codigo, letra)
-
+            lista_pisos.agregar_patron(nuevo_piso, codigo, patron)
     return lista_pisos
 
-def construir_matrices(lista_pisos):
-    current = lista_pisos.head
-    while current:
-        construir_matriz_piso(current)
-        current = current.siguiente
 
-def construir_matriz_piso(piso):
-    print("Nombre:", piso.nombre)
-    print("R:", piso.R)
-    print("C:", piso.C)
-    print("Matriz:")
-    print("Actual:")
-    construir_matriz_actual(piso)
-    print("Nuevo:")
-    construir_matriz_nuevo(piso)
-    print("-------------------------")
-
-def construir_matriz_actual(piso):
-    actual_letra = piso.patrones_head_actual
-
-    for _ in range(piso.R):
-        actual_row = ""
-        for _ in range(piso.C):
-            if actual_letra:
-                actual_row += actual_letra.letra + " "
-                actual_letra = actual_letra.siguiente
-            else:
-                actual_row += "- "
-        print(actual_row)
-
-def construir_matriz_nuevo(piso):
-    nuevo_letra = piso.patrones_head_nuevo
-
-    for _ in range(piso.R):
-        nuevo_row = ""
-        for _ in range(piso.C):
-            if nuevo_letra:
-                nuevo_row += nuevo_letra.letra + " "
-                nuevo_letra = nuevo_letra.siguiente
-            else:
-                nuevo_row += "- "
-        print(nuevo_row)
 
 ruta_archivo_xml = 'prueba.xml'
-lista_pisos = leer_archivo_xml(ruta_archivo_xml)
-lista_pisos.ordenar_pisos_alfabeticamente()
-lista_pisos.mostrar_pisos()
-construir_matrices(lista_pisos)

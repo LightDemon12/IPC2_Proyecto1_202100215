@@ -6,7 +6,9 @@
         <S>1</S>
         <patrones>
             <patron codigo="cod11">BNBNBBBN</patron>
-            <patron codigo="cod12">NBNBBBBB</patron>
+            <patron codigo="cod12">NNNNNNNN</patron>
+            <patron codigo="cod13">BBBBBBBB</patron>
+            <patron codigo="cod14">BNNNBNBB</patron>
         </patrones>
     </piso>
     <piso nombre="A_piso">
@@ -15,8 +17,10 @@
         <F>1</F>
         <S>1</S>
         <patrones>
-            <patron codigo="cod41">BNBNBBBN</patron>
-            <patron codigo="cod42">NBNBBBBB</patron>
+            <patron codigo="a">BNBNBBBN</patron>
+            <patron codigo="z">NBNBBBBB</patron>
+            <patron codigo="b">BBBBBBBB</patron>
+            <patron codigo="44">BNNNBNBB</patron>
         </patrones>
     </piso>
     <piso nombre="Z_piso">
@@ -40,3 +44,4 @@
         </patrones>
     </piso>
 </pisosGuatemala>
+
