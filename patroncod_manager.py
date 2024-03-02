@@ -38,14 +38,14 @@ class ListaPisos:
             current = current.siguiente
         return None
     
-def buscar_piso_y_patrones(ruta_archivo, nombre_piso, codigo_patron_actual, codigo_patron_nuevo):
+def buscar_piso_y_patrones(patron_manager, ruta_archivo, codigo_patron_actual, codigo_patron_nuevo):
     try:
         tree = ET.parse(ruta_archivo)
         root = tree.getroot()
 
         for piso_elem in root.findall('piso'):
             nombre = piso_elem.get('nombre')
-            if nombre == nombre_piso:
+            if nombre == patron_manager.nombre_piso:
                 R = int(piso_elem.find('R').text)
                 C = int(piso_elem.find('C').text)
                 F = int(piso_elem.find('F').text)
@@ -53,29 +53,33 @@ def buscar_piso_y_patrones(ruta_archivo, nombre_piso, codigo_patron_actual, codi
 
                 nuevo_piso = NodoPiso(nombre, R, C, F, S)
                 patrones_elem = piso_elem.find('patrones')
+
+                patron_actual = None  # Variable para almacenar el patrón actual
+                patron_nuevo = None    # Variable para almacenar el patrón nuevo
+
                 for patron_elem in patrones_elem.findall('patron'):
                     codigo = patron_elem.get('codigo')
                     patron = patron_elem.text
-                    if codigo == codigo_patron_actual or codigo == codigo_patron_nuevo:
-                        if not nuevo_piso.patrones_head:
-                            nuevo_piso.patrones_head = NodoPatron(codigo, patron)
-                        else:
-                            current = nuevo_piso.patrones_head
-                            while current.siguiente:
-                                current = current.siguiente
-                            current.siguiente = NodoPatron(codigo, patron)
-                return nuevo_piso
+                    if codigo == codigo_patron_actual:
+                        patron_actual = patron
+                    elif codigo == codigo_patron_nuevo:
+                        patron_nuevo = patron
+                    if patron_actual and patron_nuevo:
+                        break  # Si hemos encontrado ambos patrones, salimos del bucle
 
-        return None
+                return nuevo_piso, patron_actual, patron_nuevo
 
-    except Exception as e:
-        print(f"Error al procesar el archivo XML: {e}")
-        return None
-
+        return None, None, None  # Si no se encuentra el piso, devolver None para todos los valores
 
     except Exception as e:
         print(f"Error al procesar el archivo XML: {e}")
-        return None
+        return None, None, None
+
+
+
+
+
+
 
 def mostrar_datos_piso(piso):
     if piso:
@@ -102,6 +106,8 @@ class PatronCodManager:
         self.C = None
         self.F = None
         self.S = None
+        self.patron_actual = None
+        self.patron_nuevo = None
 
     def solicitar_codigos_patron(self, nombre_piso, R, C, F, S):
         self.nombre_piso = nombre_piso
@@ -111,6 +117,16 @@ class PatronCodManager:
         self.S = S
         self.codigo_patron_actual = input("Ingrese el código del patrón actual: ")
         self.codigo_patron_nuevo = input("Ingrese el código del nuevo patrón: ")
+    
+        # Llamar a la función buscar_piso_y_patrones con self como argumento
+        piso, patron_actual, patron_nuevo = buscar_piso_y_patrones(self, ruta_archivo_xml, self.codigo_patron_actual, self.codigo_patron_nuevo)
+    
+        # Luego, puedes realizar otras operaciones o asignar valores en función de los resultados obtenidos
+        # Por ejemplo:
+        self.patron_actual = patron_actual
+        self.patron_nuevo = patron_nuevo
+
+
 
     def mostrar_datos(self):
         print("Datos guardados en PatronCodManager:")
@@ -121,12 +137,21 @@ class PatronCodManager:
         print(f"S: {self.S}")
         print(f"Código del patrón actual: {self.codigo_patron_actual}")
         print(f"Código del nuevo patrón: {self.codigo_patron_nuevo}")
+        print(f"Patrón del patrón actual: {self.patron_actual}")
+        print(f"Patrón del nuevo patrón: {self.patron_nuevo}")
+
+    def asignar_patrones(self, piso):
+        current = piso.patrones_head
+        while current:
+            if current.codigo == self.codigo_patron_actual:
+                self.patron_actual = current.patron
+            elif current.codigo == self.codigo_patron_nuevo:
+                self.patron_nuevo = current.patron
+            current = current.siguiente
 
     def realizar_operaciones(self):
         # Realizar operaciones con los datos guardados
         pass
 
-
-
-
+ruta_archivo_xml= 'prueba.xml'
 
