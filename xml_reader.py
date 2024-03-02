@@ -2,6 +2,7 @@ import xml.etree.ElementTree as ET
 from os import system, startfile
 from graphviz import Digraph
 
+
 class Nodo_Patron:
     def __init__(self, codigo, patron):
         self.codigo = codigo
@@ -9,10 +10,12 @@ class Nodo_Patron:
         self.siguiente = None
 
 class Nodo_Piso:
-    def __init__(self, nombre, R, C):
+    def __init__(self, nombre, R, C, F, S):
         self.nombre = nombre
         self.R = R
         self.C = C
+        self.F = F  # Agregado para almacenar el valor de F
+        self.S = S  # Agregado para almacenar el valor de S
         self.patrones_head = None
         self.siguiente = None
     
@@ -35,16 +38,13 @@ class Nodo_Piso:
             print("")
             current_patron = current_patron.siguiente
 
-    
-
 class Lista_Pisos:
     def __init__(self):
         self.head = None
+    
+    def agregar_piso(self, nombre, R, C, F, S):
+        nuevo_piso = Nodo_Piso(nombre, R, C, F, S)
 
-    def agregar_piso(self, nombre, R, C):
-        nuevo_piso = Nodo_Piso(nombre, R, C)
-
-        # Caso: la lista de pisos está vacía o el nuevo piso va al inicio
         if not self.head or self.head.nombre > nombre:
             nuevo_piso.siguiente = self.head
             self.head = nuevo_piso
@@ -52,7 +52,6 @@ class Lista_Pisos:
 
         current = self.head
 
-        # Encontrar la posición donde insertar el nuevo piso
         while current.siguiente and current.siguiente.nombre <= nombre:
             current = current.siguiente
 
@@ -67,12 +66,11 @@ class Lista_Pisos:
             if current.nombre == nombre_piso:
                 return current
             current = current.siguiente
-        return None  # Devolver None si no se encuentra el piso
+        return None
     
     def agregar_patron(self, piso, codigo, patron):
         nuevo_patron = Nodo_Patron(codigo, patron)
 
-        # Caso: la lista de patrones está vacía o el nuevo patrón va al inicio
         if not piso.patrones_head or piso.patrones_head.codigo > codigo:
             nuevo_patron.siguiente = piso.patrones_head
             piso.patrones_head = nuevo_patron
@@ -80,7 +78,6 @@ class Lista_Pisos:
 
         current = piso.patrones_head
 
-        # Encontrar la posición donde insertar el nuevo patrón
         while current.siguiente and current.siguiente.codigo <= codigo:
             current = current.siguiente
 
@@ -92,8 +89,6 @@ class Lista_Pisos:
         while current:
             print("Nombre:", current.nombre)
             current = current.siguiente
-
-
 
     def mostrar_matriz(self, piso):
         if not piso.patrones_head:
@@ -128,8 +123,6 @@ def construir_matriz_nuevo(piso, codigo_patron=None):
 
         current_patron = current_patron.siguiente
 
-
-
 def leer_archivo_xml(ruta_archivo):
     lista_pisos = Lista_Pisos()
     tree = ET.parse(ruta_archivo)
@@ -138,8 +131,10 @@ def leer_archivo_xml(ruta_archivo):
         nombre = piso_elem.get('nombre')
         R = int(piso_elem.find('R').text)
         C = int(piso_elem.find('C').text)
+        F = int(piso_elem.find('F').text)  # Leer el valor de F
+        S = int(piso_elem.find('S').text)  # Leer el valor de S
 
-        nuevo_piso = lista_pisos.agregar_piso(nombre, R, C)
+        nuevo_piso = lista_pisos.agregar_piso(nombre, R, C, F, S)
 
         patrones_elem = piso_elem.find('patrones')
         for patron_elem in patrones_elem.findall('patron'):
@@ -147,6 +142,7 @@ def leer_archivo_xml(ruta_archivo):
             patron = patron_elem.text
             lista_pisos.agregar_patron(nuevo_piso, codigo, patron)
     return lista_pisos
+
 
 
 
