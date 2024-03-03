@@ -37,7 +37,6 @@ class ListaPisos:
                 return current
             current = current.siguiente
         return None
-    
 def buscar_piso_y_patrones(patron_manager, ruta_archivo, codigo_patron_actual, codigo_patron_nuevo):
     try:
         tree = ET.parse(ruta_archivo)
@@ -60,16 +59,26 @@ def buscar_piso_y_patrones(patron_manager, ruta_archivo, codigo_patron_actual, c
                 for patron_elem in patrones_elem.findall('patron'):
                     codigo = patron_elem.get('codigo')
                     patron = patron_elem.text
+                    nodo_patron = NodoPatron(codigo, patron)  # Crear instancia de NodoPatron
                     if codigo == codigo_patron_actual:
-                        patron_actual = patron
+                        patron_actual = nodo_patron
                     elif codigo == codigo_patron_nuevo:
-                        patron_nuevo = patron
+                        patron_nuevo = nodo_patron
                     if patron_actual and patron_nuevo:
                         break  # Si hemos encontrado ambos patrones, salimos del bucle
+
+                # Almacenar los nodos de patrones en el PatronCodManager
+                patron_manager.patron_actual = patron_actual
+                patron_manager.patron_nuevo = patron_nuevo
 
                 return nuevo_piso, patron_actual, patron_nuevo
 
         return None, None, None  # Si no se encuentra el piso, devolver None para todos los valores
+
+    except Exception as e:
+        print(f"Error al procesar el archivo XML: {e}")
+        return None, None, None
+
 
     except Exception as e:
         print(f"Error al procesar el archivo XML: {e}")
@@ -131,14 +140,16 @@ class PatronCodManager:
     def mostrar_datos(self):
         print("Datos guardados en PatronCodManager:")
         print(f"Nombre del piso: {self.nombre_piso}")
-        print(f"R: {self.R}")
-        print(f"C: {self.C}")
-        print(f"F: {self.F}")
-        print(f"S: {self.S}")
-        print(f"Código del patrón actual: {self.codigo_patron_actual}")
-        print(f"Código del nuevo patrón: {self.codigo_patron_nuevo}")
-        print(f"Patrón del patrón actual: {self.patron_actual}")
-        print(f"Patrón del nuevo patrón: {self.patron_nuevo}")
+        print(f"Filas del patrón : {self.R}")  # Mostrar el número de filas del patrón
+        print(f"Columnas del patrón : {self.C}")  # Mostrar el número de columnas del patrón
+        print(f"Costo por voltear el piso Q.: {self.F} .00")  # Mostrar el costo por voltear el piso
+        print(f"Costo por intercambiar los pisos Q.: {self.S} .00")  # Mostrar el costo por intercambiar los pisos
+        print(f"Código del patrón actual: {self.codigo_patron_actual}")  # Mostrar el código del patrón actual
+        print(f"Patrón del patrón actual: {self.patron_actual.patron}")  # Mostrar el patrón correspondiente al código actual
+        print(f"Código del nuevo patrón: {self.codigo_patron_nuevo}")  # Mostrar el código del nuevo patrón
+        print(f"Patrón del nuevo patrón: {self.patron_nuevo.patron}")  # Mostrar el patrón correspondiente al nuevo código
+
+
 
     def asignar_patrones(self, piso):
         current = piso.patrones_head
@@ -152,6 +163,46 @@ class PatronCodManager:
     def realizar_operaciones(self):
         # Realizar operaciones con los datos guardados
         pass
+
+
+def calcular_costo_minimo(patron_inicial, patron_final, costo_volteo, costo_intercambio):
+    costo_total = 0
+    # Contadores para el número de volteos e intercambios
+    volteos_realizados = 0
+    intercambios_realizados = 0
+    
+    # Iterar sobre cada nodo en los patrones iniciales y finales
+    nodo_inicial = patron_inicial
+    nodo_final = patron_final
+    
+    while nodo_inicial is not None and nodo_final is not None:
+        azulejo_inicial = nodo_inicial.patron
+        azulejo_final = nodo_final.patron
+        
+        # Si los azulejos son diferentes, se necesitará una operación
+        if azulejo_inicial != azulejo_final:
+            # Si es posible, hacer un intercambio
+            if intercambios_realizados < 2 and nodo_inicial.siguiente is not None and nodo_final.siguiente is not None and nodo_inicial.siguiente.patron != nodo_final.siguiente.patron:
+                costo_total += costo_intercambio
+                intercambios_realizados += 1
+                nodo_inicial = nodo_inicial.siguiente
+                nodo_final = nodo_final.siguiente
+            # Si no, hacer un volteo
+            else:
+                costo_total += costo_volteo
+                volteos_realizados += 1
+                nodo_inicial = nodo_inicial.siguiente
+                nodo_final = nodo_final.siguiente
+        else:
+            nodo_inicial = nodo_inicial.siguiente
+            nodo_final = nodo_final.siguiente
+    
+    return costo_total
+
+
+
+
+
 
 ruta_archivo_xml= 'prueba.xml'
 

@@ -1,5 +1,6 @@
 from xml_reader import leer_archivo_xml
 from patroncod_manager import PatronCodManager
+from patroncod_manager import calcular_costo_minimo
 
 def menu():
     print("Menu:")
@@ -30,6 +31,9 @@ def main():
                 patron_manager.solicitar_codigos_patron(nombre_piso, R, C, F, S)  # Solicitar códigos de patrón al usuario
                 patron_manager.mostrar_datos()  # Mostrar los datos ingresados por el usuario
                 patron_manager.realizar_operaciones()  # Realizar operaciones con los códigos de patrón
+                # Llamar a la función calcular_costo_minimo
+                costo_minimo = calcular_costo_minimo(patron_manager.patron_actual, patron_manager.patron_nuevo, F, S)
+                print("Costo mínimo:", costo_minimo)
             else:
                 print("No se encontró el piso con el nombre especificado.")
         elif opcion == '3':
@@ -40,5 +44,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-

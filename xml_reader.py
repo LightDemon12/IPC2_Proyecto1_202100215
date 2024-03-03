@@ -22,7 +22,7 @@ class Nodo_Piso:
     def mostrar_matrices_piso(self):
         current_patron = self.patrones_head
         while current_patron:
-            print("Patron:", current_patron.codigo)
+            print("Patron con codigo:", current_patron.codigo)
             current_patron_text = current_patron.patron
             index = 0
 
