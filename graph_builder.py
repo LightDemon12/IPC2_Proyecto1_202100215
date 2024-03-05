@@ -1,45 +1,27 @@
-from graph_builder import construir_matriz_nuevo
+import graphviz
 
-from graphviz import Digraph
+def generate_afd():
+    # Creamos el objeto Digraph de Graphviz
+    dot = graphviz.Digraph()
 
-def construir_matriz_nuevo(piso, codigo_patron=None):
-    current_patron = piso.patrones_head
-    while current_patron:
-        if codigo_patron and current_patron.codigo != codigo_patron:
-            current_patron = current_patron.siguiente
-            continue
+    # Añadimos los nodos al grafo
+    dot.node("inicio", label="Inicio", shape="circle", color="black", style="filled")
+    dot.node("numero", label="Numero", shape="circle", color="black", style="filled")
+    dot.node("punto", label=".", shape="circle", color="black", style="filled")
+    dot.node("coma", label=",", shape="circle", color="black", style="filled")
+    dot.node("tres_numeros", label="Tres\nNúmeros", shape="doublecircle", color="black", style="filled")
 
-        print("Patron:", current_patron.codigo)
-        current_patron_text = current_patron.patron
-        index = 0
+    # Añadimos las transiciones
+    dot.edge("inicio", "numero", label="[+-0-9]")
+    dot.edge("numero", "punto", label="[.]")
+    dot.edge("punto", "tres_numeros", label="[0-9]")
+    dot.edge("tres_numeros", "coma", label="[,]")
+    dot.edge("coma", "numero", label="[0-9]")
+    dot.edge("tres_numeros", "punto", label="[.]")
+    dot.edge("coma", "punto", label="[.]")
 
-        # Crear el objeto Digraph
-        dot = Digraph(comment='Patrón')
+    # Renderizamos el grafo y lo guardamos como imagen
+    dot.render("afd_valid", format="png")
 
-        # Agregar nodos al gráfico en el orden correcto de la matriz
-        for i in range(piso.R):
-            for j in range(piso.C):
-                if index < len(current_patron_text):
-                    if current_patron_text[index] == 'B':
-                        dot.node(f'{i}-{j}', '', shape='square', style='filled', fillcolor='black', width='0.5')
-                    elif current_patron_text[index] == 'N':
-                        dot.node(f'{i}-{j}', '', shape='square', style='filled', fillcolor='white', width='0.5')
-                    index += 1
-                else:
-                    dot.node(f'{i}-{j}', '', shape='square', style='filled', fillcolor='white', width='0.5')
-        
-        # Agregar bordes
-        for i in range(piso.R):
-            for j in range(piso.C):
-                if j < piso.C - 1:
-                    dot.edge(f'{i}-{j}', f'{i}-{j+1}', style='invis')
-                if i < piso.R - 1:
-                    dot.edge(f'{i}-{j}', f'{i+1}-{j}', style='invis')
-
-        # Guardar el gráfico en formato DOT
-        dot.render('patron', format='pdf', cleanup=True)
-
-        if codigo_patron:
-            break
-
-        current_patron = current_patron.siguiente
+if __name__ == "__main__":
+    generate_afd()

@@ -1,5 +1,5 @@
 import xml.etree.ElementTree as ET
-
+from os import startfile, system
 class NodoPatron:
     def __init__(self, codigo, patron):
         self.codigo = codigo
@@ -80,10 +80,6 @@ def buscar_piso_y_patrones(patron_manager, ruta_archivo, codigo_patron_actual, c
         return None, None, None
 
 
-    except Exception as e:
-        print(f"Error al procesar el archivo XML: {e}")
-        return None, None, None
-
 
 
 
@@ -135,8 +131,6 @@ class PatronCodManager:
         self.patron_actual = patron_actual
         self.patron_nuevo = patron_nuevo
 
-
-
     def mostrar_datos(self):
         print("Datos guardados en PatronCodManager:")
         print(f"Nombre del piso: {self.nombre_piso}")
@@ -148,8 +142,6 @@ class PatronCodManager:
         print(f"Patrón del patrón actual: {self.patron_actual.patron}")  # Mostrar el patrón correspondiente al código actual
         print(f"Código del nuevo patrón: {self.codigo_patron_nuevo}")  # Mostrar el código del nuevo patrón
         print(f"Patrón del nuevo patrón: {self.patron_nuevo.patron}")  # Mostrar el patrón correspondiente al nuevo código
-
-
 
     def asignar_patrones(self, piso):
         current = piso.patrones_head
@@ -164,40 +156,120 @@ class PatronCodManager:
         # Realizar operaciones con los datos guardados
         pass
 
+    def calcular_costo_minimo(self):
+        costo_total = 0
+        # Recorremos los patrones y contamos las operaciones necesarias para transformarlos
+        for i, (azulejo_inicial, azulejo_final) in enumerate(zip(self.patron_actual.patron, self.patron_nuevo.patron), 1):
+            if azulejo_inicial != azulejo_final:
+                if azulejo_inicial == 'B' and azulejo_final == 'N':
+                    costo_operacion = min(self.F, 1) * self.F  # Costo de volteo específico del piso
+                    costo_total += costo_operacion
+                    print(f"{i}. Voltear un azulejo. Costo: {costo_operacion}")
+                else:
+                    costo_operacion = self.S * self.S  # Costo de intercambio específico del piso
+                    costo_total += costo_operacion
+                    print(f"{i}. Intercambiar dos azulejos. Costo: {costo_operacion}")
 
-def calcular_costo_minimo(patron_inicial, patron_final, costo_volteo, costo_intercambio):
-    costo_total = 0
-    # Contadores para el número de volteos e intercambios
-    volteos_realizados = 0
-    intercambios_realizados = 0
-    
-    # Iterar sobre cada nodo en los patrones iniciales y finales
-    nodo_inicial = patron_inicial
-    nodo_final = patron_final
-    
-    while nodo_inicial is not None and nodo_final is not None:
-        azulejo_inicial = nodo_inicial.patron
-        azulejo_final = nodo_final.patron
-        
-        # Si los azulejos son diferentes, se necesitará una operación
-        if azulejo_inicial != azulejo_final:
-            # Si es posible, hacer un intercambio
-            if intercambios_realizados < 2 and nodo_inicial.siguiente is not None and nodo_final.siguiente is not None and nodo_inicial.siguiente.patron != nodo_final.siguiente.patron:
-                costo_total += costo_intercambio
-                intercambios_realizados += 1
-                nodo_inicial = nodo_inicial.siguiente
-                nodo_final = nodo_final.siguiente
-            # Si no, hacer un volteo
-            else:
-                costo_total += costo_volteo
-                volteos_realizados += 1
-                nodo_inicial = nodo_inicial.siguiente
-                nodo_final = nodo_final.siguiente
-        else:
-            nodo_inicial = nodo_inicial.siguiente
-            nodo_final = nodo_final.siguiente
-    
-    return costo_total
+        return costo_total
+
+
+
+
+def construir_matriz_nuevo2 (piso, codigo_patron_actual=None, codigo_patron_nuevo=None):
+    current_patron = piso.patrones_head
+    patron_actual = None
+    patron_nuevo = None
+
+    # Encontrar el patrón actual y el nuevo patrón si se proporcionan los códigos
+    while current_patron:
+        if codigo_patron_actual and current_patron.codigo == codigo_patron_actual:
+            patron_actual = current_patron.patron
+        elif codigo_patron_nuevo and current_patron.codigo == codigo_patron_nuevo:
+            patron_nuevo = current_patron.patron
+
+        if patron_actual and patron_nuevo:
+            break
+
+        current_patron = current_patron.siguiente
+
+    # Si no se proporcionan los códigos de los patrones, usar el primer y segundo patrón encontrados
+    if not codigo_patron_actual and not codigo_patron_nuevo:
+        if current_patron:
+            patron_actual = current_patron.patron
+            if current_patron.siguiente:
+                patron_nuevo = current_patron.siguiente.patron
+
+    # Imprimir las matrices de los patrones
+    if patron_actual:
+        print("Patrón Actual:")
+        for fila in patron_actual:
+            print(" ".join(fila))
+        print("")
+
+    if patron_nuevo:
+        print("Nuevo Patrón:")
+        for fila in patron_nuevo:
+            print(" ".join(fila))
+
+
+def generar_patrones_pdf(patron_actual, patron_nuevo, nombre_piso):
+    # Definir el contenido del archivo DOT con los dos patrones
+    contenido_dot = f'''
+    digraph G {{
+        node [shape=plaintext];
+        edge [style=invis];
+
+        label = "Pisos y Patrones";
+
+        subgraph cluster_patron_actual {{
+            label="Patrón Actual";
+            piso_actual [
+                label=<
+                    <TABLE border="1" cellspacing="0" cellpadding="10">
+                        {generar_filas_patron(patron_actual)}
+                    </TABLE>
+                >
+                shape=none
+            ];
+        }}
+
+        subgraph cluster_patron_nuevo {{
+            label="Nuevo Patrón";
+            piso_nuevo [
+                label=<
+                    <TABLE border="1" cellspacing="0" cellpadding="10">
+                        {generar_filas_patron(patron_nuevo)}
+                    </TABLE>
+                >
+                shape=none
+            ];
+        }}
+    }}
+    '''
+
+    # Escribir el contenido en un archivo DOT
+    with open("patrones.dot", "w") as archivo_dot:
+        archivo_dot.write(contenido_dot)
+
+    # Convertir el archivo DOT a PDF utilizando Graphviz
+    system('dot -Tpdf patrones.dot -o patrones.pdf')
+
+    # Abrir el archivo PDF generado
+    startfile("patrones.pdf")
+
+def generar_filas_patron(patron):
+    filas = ""
+    for fila in patron:
+        filas += "        <tr>"
+        for color in fila:
+            if color == 'B':
+                filas += "<td bgcolor=\"white\"></td>"
+            elif color == 'N':
+                filas += "<td bgcolor=\"Black\"></td>"
+        filas += "</tr>\n"
+    return filas
+
+
 
 
 

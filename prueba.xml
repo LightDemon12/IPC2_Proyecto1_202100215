@@ -20,7 +20,7 @@
             <patron codigo="a">BNBNBBBN</patron>
             <patron codigo="z">NBNBBBBB</patron>
             <patron codigo="b">BBBBBBBB</patron>
-            <patron codigo="44">BNNNBNBB</patron>
+            <patron codigo="44">NBNBBBBB</patron>
         </patrones>
     </piso>
     <piso nombre="Z_piso">
@@ -39,8 +39,8 @@
         <F>6</F>
         <S>1</S>
         <patrones>
-            <patron codigo="cod31">BNNNN</patron>
-            <patron codigo="cod32">NNNBB</patron>
+            <patron codigo="31">BNNNN</patron>
+            <patron codigo="32">NNNBB</patron>
         </patrones>
     </piso>
 </pisosGuatemala>

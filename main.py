@@ -1,6 +1,13 @@
 from xml_reader import leer_archivo_xml
-from patroncod_manager import PatronCodManager
-from patroncod_manager import calcular_costo_minimo
+from patroncod_manager import PatronCodManager, construir_matriz_nuevo2
+
+def main():
+    # Tu código aquí
+    pass
+
+if __name__ == "__main__":
+    main()
+
 
 def menu():
     print("Menu:")
@@ -28,12 +35,19 @@ def main():
                 C = piso.C
                 F = piso.F
                 S = piso.S
-                patron_manager.solicitar_codigos_patron(nombre_piso, R, C, F, S)  # Solicitar códigos de patrón al usuario
-                patron_manager.mostrar_datos()  # Mostrar los datos ingresados por el usuario
-                patron_manager.realizar_operaciones()  # Realizar operaciones con los códigos de patrón
-                # Llamar a la función calcular_costo_minimo
-                costo_minimo = calcular_costo_minimo(patron_manager.patron_actual, patron_manager.patron_nuevo, F, S)
+                patron_manager.solicitar_codigos_patron(nombre_piso, R, C, F, S)
+                patron_manager.mostrar_datos()
+                patron_manager.realizar_operaciones()
+                # Obtener los patrones actuales y nuevos como cadenas de texto
+                patron_actual = patron_manager.patron_actual.patron
+                patron_nuevo = patron_manager.patron_nuevo.patron
+                print("Llamando a la función calcular_costo_minimo...")
+                # Llamar a la función calcular_costo_minimo con los patrones como cadenas de texto
+                costo_minimo = patron_manager.calcular_costo_minimo()
+                print("Se ha calculado el costo mínimo.")
                 print("Costo mínimo:", costo_minimo)
+                # Mostrar las matrices del patrón actual y del nuevo patrón
+                construir_matriz_nuevo2(piso, patron_actual, patron_nuevo)
             else:
                 print("No se encontró el piso con el nombre especificado.")
         elif opcion == '3':
@@ -44,3 +58,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
