@@ -146,4 +146,3 @@ def leer_archivo_xml(ruta_archivo):
 
 
 
-ruta_archivo_xml = 'prueba.xml'

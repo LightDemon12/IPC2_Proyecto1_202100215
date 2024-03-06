@@ -1,5 +1,6 @@
 import xml.etree.ElementTree as ET
 from os import startfile, system
+
 class NodoPatron:
     def __init__(self, codigo, patron):
         self.codigo = codigo
@@ -15,6 +16,8 @@ class NodoPiso:
         self.S = S
         self.patrones_head = None
         self.siguiente = None
+
+
 
 class ListaPisos:
     def __init__(self):
@@ -37,6 +40,7 @@ class ListaPisos:
                 return current
             current = current.siguiente
         return None
+    
 def buscar_piso_y_patrones(patron_manager, ruta_archivo, codigo_patron_actual, codigo_patron_nuevo):
     try:
         tree = ET.parse(ruta_archivo)
@@ -86,6 +90,7 @@ def buscar_piso_y_patrones(patron_manager, ruta_archivo, codigo_patron_actual, c
 
 
 
+
 def mostrar_datos_piso(piso):
     if piso:
         print("Piso encontrado:")
@@ -114,7 +119,7 @@ class PatronCodManager:
         self.patron_actual = None
         self.patron_nuevo = None
 
-    def solicitar_codigos_patron(self, nombre_piso, R, C, F, S):
+    def solicitar_codigos_patron(self, nombre_piso, R, C, F, S, ruta_archivo_xml):
         self.nombre_piso = nombre_piso
         self.R = R
         self.C = C
@@ -126,10 +131,13 @@ class PatronCodManager:
         # Llamar a la función buscar_piso_y_patrones con self como argumento
         piso, patron_actual, patron_nuevo = buscar_piso_y_patrones(self, ruta_archivo_xml, self.codigo_patron_actual, self.codigo_patron_nuevo)
     
-        # Luego, puedes realizar otras operaciones o asignar valores en función de los resultados obtenidos
-        # Por ejemplo:
+        # Asignar los patrones actual y nuevo
         self.patron_actual = patron_actual
         self.patron_nuevo = patron_nuevo
+
+        # Generar el archivo PDF de los patrones
+        self.generar_patrones_pdf()
+                
 
     def mostrar_datos(self):
         print("Datos guardados en PatronCodManager:")
@@ -171,110 +179,60 @@ class PatronCodManager:
                     print(f"{i}. Intercambiar dos azulejos. Costo: {costo_operacion}")
 
         return costo_total
+    
+    def generar_patrones_pdf(self):
+        # Definir el contenido del archivo DOT con los dos patrones
+        contenido_dot = f'''
+        digraph G {{
+            node [shape=plaintext];
+            edge [style=invis];
 
+            label = "Pisos y Patrones";
 
+            subgraph cluster_patron_actual {{
+                label="Patrón Actual";
+                piso_actual [
+                    label=<
+                        <TABLE border="1" cellspacing="0" cellpadding="10">
+                            {self.generar_filas_patron(self.patron_actual.patron)}
+                        </TABLE>
+                    >
+                    shape=none
+                ];
+            }}
 
-
-def construir_matriz_nuevo2 (piso, codigo_patron_actual=None, codigo_patron_nuevo=None):
-    current_patron = piso.patrones_head
-    patron_actual = None
-    patron_nuevo = None
-
-    # Encontrar el patrón actual y el nuevo patrón si se proporcionan los códigos
-    while current_patron:
-        if codigo_patron_actual and current_patron.codigo == codigo_patron_actual:
-            patron_actual = current_patron.patron
-        elif codigo_patron_nuevo and current_patron.codigo == codigo_patron_nuevo:
-            patron_nuevo = current_patron.patron
-
-        if patron_actual and patron_nuevo:
-            break
-
-        current_patron = current_patron.siguiente
-
-    # Si no se proporcionan los códigos de los patrones, usar el primer y segundo patrón encontrados
-    if not codigo_patron_actual and not codigo_patron_nuevo:
-        if current_patron:
-            patron_actual = current_patron.patron
-            if current_patron.siguiente:
-                patron_nuevo = current_patron.siguiente.patron
-
-    # Imprimir las matrices de los patrones
-    if patron_actual:
-        print("Patrón Actual:")
-        for fila in patron_actual:
-            print(" ".join(fila))
-        print("")
-
-    if patron_nuevo:
-        print("Nuevo Patrón:")
-        for fila in patron_nuevo:
-            print(" ".join(fila))
-
-
-def generar_patrones_pdf(patron_actual, patron_nuevo, nombre_piso):
-    # Definir el contenido del archivo DOT con los dos patrones
-    contenido_dot = f'''
-    digraph G {{
-        node [shape=plaintext];
-        edge [style=invis];
-
-        label = "Pisos y Patrones";
-
-        subgraph cluster_patron_actual {{
-            label="Patrón Actual";
-            piso_actual [
-                label=<
-                    <TABLE border="1" cellspacing="0" cellpadding="10">
-                        {generar_filas_patron(patron_actual)}
-                    </TABLE>
-                >
-                shape=none
-            ];
+            subgraph cluster_patron_nuevo {{
+                label="Nuevo Patrón";
+                piso_nuevo [
+                    label=<
+                        <TABLE border="1" cellspacing="0" cellpadding="10">
+                            {self.generar_filas_patron(self.patron_nuevo.patron)}
+                        </TABLE>
+                    >
+                    shape=none
+                ];
+            }}
         }}
+        '''
 
-        subgraph cluster_patron_nuevo {{
-            label="Nuevo Patrón";
-            piso_nuevo [
-                label=<
-                    <TABLE border="1" cellspacing="0" cellpadding="10">
-                        {generar_filas_patron(patron_nuevo)}
-                    </TABLE>
-                >
-                shape=none
-            ];
-        }}
-    }}
-    '''
+        # Escribir el contenido en un archivo DOT
+        with open("patrones.dot", "w") as archivo_dot:
+            archivo_dot.write(contenido_dot)
 
-    # Escribir el contenido en un archivo DOT
-    with open("patrones.dot", "w") as archivo_dot:
-        archivo_dot.write(contenido_dot)
+        # Convertir el archivo DOT a PDF utilizando Graphviz
+        system('dot -Tpdf patrones.dot -o patrones.pdf')
 
-    # Convertir el archivo DOT a PDF utilizando Graphviz
-    system('dot -Tpdf patrones.dot -o patrones.pdf')
+        # Abrir el archivo PDF generado
+        startfile("patrones.pdf")
 
-    # Abrir el archivo PDF generado
-    startfile("patrones.pdf")
-
-def generar_filas_patron(patron):
-    filas = ""
-    for fila in patron:
-        filas += "        <tr>"
-        for color in fila:
-            if color == 'B':
-                filas += "<td bgcolor=\"white\"></td>"
-            elif color == 'N':
-                filas += "<td bgcolor=\"Black\"></td>"
-        filas += "</tr>\n"
-    return filas
-
-
-
-
-
-
-
-
-ruta_archivo_xml= 'prueba.xml'
-
+    def generar_filas_patron(self, patron):
+        filas = ""
+        for fila in patron:
+            filas += "        <tr>"
+            for color in fila:
+                if color == 'B':
+                    filas += "<td bgcolor=\"white\"></td>"
+                elif color == 'N':
+                    filas += "<td bgcolor=\"Black\"></td>"
+            filas += "</tr>\n"
+        return filas
